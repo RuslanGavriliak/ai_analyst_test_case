@@ -56,8 +56,14 @@ def load_semantic_layer(path: Path) -> dict:
 
 
 def build_client() -> OpenAI:
+    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if not api_key or api_key.startswith("sk-..."):
+        raise SystemExit(
+            "Не задан OPENAI_API_KEY. Проверьте файл .env в корне репозитория "
+            "(должен быть после git clone) или скопируйте .env.example."
+        )
     return OpenAI(
-        api_key=os.environ["OPENAI_API_KEY"],
+        api_key=api_key,
         base_url=os.environ.get("OPENAI_BASE_URL"),
     )
 

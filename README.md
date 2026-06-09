@@ -62,15 +62,21 @@ python3 src/pipeline.py --limit 15
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
 
 python3 src/pipeline.py
 python3 src/evaluate.py
 ```
 
+## Доступ к LLM API
+
+`OPENAI_API_KEY` и `OPENAI_BASE_URL` уже лежат в `.env` в репозитории (proxy API, модель `gpt-4o-mini`). После клонирования ничего дополнительно настраивать не нужно.
+
+Если `.env` отсутствует — скопируйте `.env.example` и запросите ключ у интервьюера.
+
 ## Репозиторий
 
 ```text
+.env, .env.example
 data/tasks.jsonl, data/golden.jsonl, data/semantic_layer.json
 src/pipeline.py, src/evaluate.py
 CONTEXT_HANDOFF_SCORE.md, AGENT_FLOW_GUIDE.md
