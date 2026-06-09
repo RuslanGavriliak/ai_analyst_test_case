@@ -1,0 +1,407 @@
+{
+  "version": "case-2.1",
+  "domains": [
+    {
+      "id": "assortment",
+      "name": "Ассортимент и лояльность",
+      "description": "Продажи, сегменты АСР, куб чеков, категории SKU, списания",
+      "synonyms": ["кулинария", "аср", "амбассадор", "сегмент", "категория", "подгруппа", "куб", "чеки", "выручка"]
+    },
+    {
+      "id": "search",
+      "name": "Поиск в приложении",
+      "description": "Логи поиска, конверсия в добавление, A/B словаря, пустая выдача",
+      "synonyms": ["поиск", "выдача", "добавление из поиска", "токены", "search_bar", "a2c", "нулевая выдача"]
+    },
+    {
+      "id": "pricing",
+      "name": "Цены и наценка",
+      "description": "История цен SKU, наценка полки, себестоимость, изменения цен",
+      "synonyms": ["наценка", "маржа", "цена полки", "sku_price", "себестоимость"]
+    },
+    {
+      "id": "delivery",
+      "name": "Доставка",
+      "description": "Заказы доставки, отмены, SLA; без NPS и CSAT в данном SL",
+      "synonyms": ["доставка", "курьер", "заказ доставки", "delivery", "отмена заказа"]
+    },
+    {
+      "id": "loyalty",
+      "name": "Лояльность и промо",
+      "description": "Бонусы, купоны, акции лояльности; не путать с сегментами АСР в кубе",
+      "synonyms": ["бонусы", "купон", "промокод", "лояльность", "начисление бонусов"]
+    },
+    {
+      "id": "supply",
+      "name": "Запасы и списания",
+      "description": "Out-of-stock, оборачиваемость, потери на складе",
+      "synonyms": ["остатки", "out of stock", "списания", "потери", "склад", "запасы"]
+    },
+    {
+      "id": "app_engagement",
+      "name": "Вовлечённость в приложении",
+      "description": "Сессии и экраны МП, не путать с поиском и конверсией выдачи",
+      "synonyms": ["сессии", "dau", "экраны", "визиты в приложение", "engagement"]
+    }
+  ],
+  "metrics": [
+    {
+      "id": "client_cnt",
+      "domain_id": "assortment",
+      "name": "Количество уникальных карт (клиентов)",
+      "synonyms": ["карты", "клиенты", "client"],
+      "grain_entity": "segment",
+      "unit": "карты",
+      "primary_source": "mart.check_aggregated_by_cube",
+      "required_filters": [
+        {"field": "sku_id", "operator": "=", "value": "Total", "reason": "агрегат по товарам в кубе"},
+        {"field": "territorial_group", "operator": "=", "value": "Total", "reason": "агрегат по территории"},
+        {"field": "store_type", "operator": "=", "value": "Total", "reason": "агрегат по типу магазина"},
+        {"field": "purchase_type", "operator": "=", "value": "Total", "reason": "агрегат по типу покупки"}
+      ]
+    },
+    {
+      "id": "check_cnt",
+      "domain_id": "assortment",
+      "name": "Количество чеков",
+      "synonyms": ["чеки", "checks"],
+      "grain_entity": "segment",
+      "unit": "чеки",
+      "primary_source": "mart.check_aggregated_by_cube",
+      "required_filters": [
+        {"field": "sku_id", "operator": "=", "value": "Total"},
+        {"field": "territorial_group", "operator": "=", "value": "Total"},
+        {"field": "store_type", "operator": "=", "value": "Total"},
+        {"field": "purchase_type", "operator": "=", "value": "Total"}
+      ]
+    },
+    {
+      "id": "base_amt_sum",
+      "domain_id": "assortment",
+      "name": "Выручка (сумма base_amt)",
+      "synonyms": ["выручка", "продажи", "revenue"],
+      "grain_entity": "segment",
+      "unit": "рубли",
+      "primary_source": "mart.check_aggregated_by_cube",
+      "required_filters": [
+        {"field": "sku_id", "operator": "=", "value": "Total"},
+        {"field": "territorial_group", "operator": "=", "value": "Total"},
+        {"field": "store_type", "operator": "=", "value": "Total"},
+        {"field": "purchase_type", "operator": "=", "value": "Total"}
+      ]
+    },
+    {
+      "id": "quantity_sum",
+      "domain_id": "assortment",
+      "name": "Количество проданных единиц",
+      "synonyms": ["штуки", "quantity"],
+      "grain_entity": "segment",
+      "unit": "штуки",
+      "primary_source": "mart.check_aggregated_by_cube",
+      "required_filters": [
+        {"field": "sku_id", "operator": "=", "value": "Total"},
+        {"field": "territorial_group", "operator": "=", "value": "Total"},
+        {"field": "store_type", "operator": "=", "value": "Total"},
+        {"field": "purchase_type", "operator": "=", "value": "Total"}
+      ]
+    },
+    {
+      "id": "avg_check_amt",
+      "domain_id": "assortment",
+      "name": "Средний чек (base_amt_sum / check_cnt)",
+      "synonyms": ["средний чек", "avg check", "средний размер чека"],
+      "grain_entity": "segment",
+      "unit": "рубли",
+      "primary_source": "mart.check_aggregated_by_cube",
+      "required_filters": [
+        {"field": "sku_id", "operator": "=", "value": "Total"},
+        {"field": "territorial_group", "operator": "=", "value": "Total"},
+        {"field": "store_type", "operator": "=", "value": "Total"},
+        {"field": "purchase_type", "operator": "=", "value": "Total"}
+      ]
+    },
+    {
+      "id": "complaints_count",
+      "domain_id": "assortment",
+      "name": "Количество жалоб на SKU",
+      "synonyms": ["жалобы", "complaints"],
+      "grain_entity": "sku",
+      "unit": "штуки",
+      "primary_source": "report.v_sku_complaints",
+      "required_filters": []
+    },
+    {
+      "id": "all_searches",
+      "domain_id": "search",
+      "name": "Число поисковых сессий (restart)",
+      "synonyms": ["поиски", "searches"],
+      "grain_entity": "user",
+      "unit": "безразмерная",
+      "primary_source": "logs.tovs_search",
+      "required_filters": [
+        {"field": "id_screen", "operator": "match", "value": "catalog_search", "reason": "только поисковый экран"},
+        {"field": "id_search", "operator": "!=", "value": "", "reason": "непустой id_search"}
+      ]
+    },
+    {
+      "id": "a2c_count_from_search",
+      "domain_id": "search",
+      "name": "Добавления в корзину из поисковой выдачи",
+      "synonyms": ["добавления", "a2c", "add to cart"],
+      "grain_entity": "user",
+      "unit": "безразмерная",
+      "primary_source": "logs.tovs_search",
+      "required_filters": [
+        {"field": "id_element", "operator": "=", "value": "add"},
+        {"field": "id_screen", "operator": "match", "value": "catalog_search"}
+      ]
+    },
+    {
+      "id": "zero_result_rate",
+      "domain_id": "search",
+      "name": "Доля поисков с пустой выдачей",
+      "synonyms": ["нулевая выдача", "zero results", "пустой поиск"],
+      "grain_entity": "user",
+      "unit": "доля",
+      "primary_source": "logs.tovs_search",
+      "required_filters": [
+        {"field": "id_screen", "operator": "match", "value": "catalog_search"},
+        {"field": "id_search", "operator": "!=", "value": ""}
+      ]
+    },
+    {
+      "id": "shelf_markup_offline",
+      "domain_id": "pricing",
+      "name": "Наценка по цене полки (offline)",
+      "synonyms": ["наценка", "маржа полки", "markup"],
+      "grain_entity": "sku",
+      "unit": "проценты",
+      "primary_source": "mart_mixed.sku_price",
+      "required_filters": [
+        {"field": "is_offline", "operator": "=", "value": "true"},
+        {"field": "price_offline", "operator": "!=", "value": "0"}
+      ]
+    },
+    {
+      "id": "cost_offline",
+      "domain_id": "pricing",
+      "name": "Себестоимость SKU (offline)",
+      "synonyms": ["себестоимость", "cost", "закупочная цена"],
+      "grain_entity": "sku",
+      "unit": "рубли",
+      "primary_source": "mart_mixed.sku_price",
+      "required_filters": [
+        {"field": "is_offline", "operator": "=", "value": "true"}
+      ]
+    },
+    {
+      "id": "price_change_cnt",
+      "domain_id": "pricing",
+      "name": "Число изменений цены SKU за период",
+      "synonyms": ["изменения цен", "price changes", "переоценка"],
+      "grain_entity": "sku",
+      "unit": "штуки",
+      "primary_source": "mart_mixed.sku_price",
+      "required_filters": [
+        {"field": "price_offline", "operator": "!=", "value": "0"}
+      ]
+    },
+    {
+      "id": "delivery_order_cnt",
+      "domain_id": "delivery",
+      "name": "Количество заказов доставки",
+      "synonyms": ["заказы доставки", "delivery orders"],
+      "grain_entity": "city",
+      "unit": "заказы",
+      "primary_source": "mart.delivery_orders",
+      "required_filters": [
+        {"field": "order_status", "operator": "!=", "value": "test"}
+      ]
+    },
+    {
+      "id": "delivery_cancel_rate",
+      "domain_id": "delivery",
+      "name": "Доля отменённых заказов доставки",
+      "synonyms": ["отмены доставки", "cancel rate"],
+      "grain_entity": "city",
+      "unit": "доля",
+      "primary_source": "mart.delivery_orders",
+      "required_filters": [
+        {"field": "order_status", "operator": "!=", "value": "test"}
+      ]
+    },
+    {
+      "id": "bonus_points_accrued",
+      "domain_id": "loyalty",
+      "name": "Начисленные бонусные баллы",
+      "synonyms": ["бонусы", "начисления", "bonus points"],
+      "grain_entity": "segment",
+      "unit": "баллы",
+      "primary_source": "mart.loyalty_events",
+      "required_filters": [
+        {"field": "event_type", "operator": "=", "value": "accrual"}
+      ]
+    },
+    {
+      "id": "coupon_redemption_cnt",
+      "domain_id": "loyalty",
+      "name": "Количество погашений купонов",
+      "synonyms": ["купон", "погашения", "redemption"],
+      "grain_entity": "coupon",
+      "unit": "штуки",
+      "primary_source": "mart.loyalty_events",
+      "required_filters": [
+        {"field": "event_type", "operator": "=", "value": "redemption"}
+      ]
+    },
+    {
+      "id": "stockout_sku_days",
+      "domain_id": "supply",
+      "name": "Дни out-of-stock по SKU",
+      "synonyms": ["out of stock", "oos", "дефицит"],
+      "grain_entity": "sku",
+      "unit": "дни",
+      "primary_source": "mart.inventory_daily",
+      "required_filters": [
+        {"field": "on_hand_qty", "operator": "=", "value": "0"}
+      ]
+    },
+    {
+      "id": "shrinkage_amount",
+      "domain_id": "supply",
+      "name": "Сумма списаний/потерь на складе",
+      "synonyms": ["списания", "потери", "shrinkage", "утилизация"],
+      "grain_entity": "store",
+      "unit": "рубли",
+      "primary_source": "mart.inventory_daily",
+      "required_filters": [
+        {"field": "movement_type", "operator": "in", "value": "shrinkage,writeoff"}
+      ]
+    },
+    {
+      "id": "session_cnt",
+      "domain_id": "app_engagement",
+      "name": "Количество сессий в приложении",
+      "synonyms": ["сессии", "sessions", "визиты"],
+      "grain_entity": "session",
+      "unit": "сессии",
+      "primary_source": "logs.app_events",
+      "required_filters": [
+        {"field": "platform", "operator": "in", "value": "ios,android"}
+      ]
+    },
+    {
+      "id": "dau",
+      "domain_id": "app_engagement",
+      "name": "Daily Active Users (уникальные пользователи за день)",
+      "synonyms": ["dau", "активные пользователи", "MAU daily"],
+      "grain_entity": "user",
+      "unit": "пользователи",
+      "primary_source": "logs.app_events",
+      "required_filters": [
+        {"field": "platform", "operator": "in", "value": "ios,android"},
+        {"field": "event_name", "operator": "=", "value": "app_open"}
+      ]
+    },
+    {
+      "id": "shelf_revenue_offline",
+      "domain_id": "pricing",
+      "name": "Выручка по цене полки (offline, оценка из sku_price)",
+      "synonyms": ["выручка полки", "revenue shelf"],
+      "grain_entity": "sku",
+      "unit": "рубли",
+      "primary_source": "mart_mixed.sku_price",
+      "required_filters": [
+        {"field": "is_offline", "operator": "=", "value": "true"}
+      ],
+      "note": "Decoy: не подходит для выручки/среднего чека из куба чеков"
+    },
+    {
+      "id": "search_session_cnt",
+      "domain_id": "search",
+      "name": "Число поисковых сессий (alias, см. all_searches)",
+      "synonyms": ["поисковые сессии", "search sessions"],
+      "grain_entity": "user",
+      "unit": "сессии",
+      "primary_source": "logs.tovs_search",
+      "required_filters": [
+        {"field": "id_screen", "operator": "match", "value": "catalog_search"}
+      ],
+      "note": "Decoy: не путать с session_cnt приложения"
+    },
+    {
+      "id": "loyalty_card_cnt",
+      "domain_id": "loyalty",
+      "name": "Число активных карт лояльности",
+      "synonyms": ["карты лояльности", "loyalty cards"],
+      "grain_entity": "segment",
+      "unit": "карты",
+      "primary_source": "mart.loyalty_events",
+      "required_filters": [],
+      "note": "Decoy: не путать с client_cnt из куба АСР"
+    }
+  ],
+  "sources": [
+    {
+      "id": "mart.check_aggregated_by_cube",
+      "domain_id": "assortment",
+      "name": "Преагрегированный куб чеков",
+      "description": "Сегменты АСР, категории, месяцы; свёртка через значение Total",
+      "synonyms": ["куб", "check cube", "аср куб"]
+    },
+    {
+      "id": "logs.tovs_search",
+      "domain_id": "search",
+      "name": "Логи поиска и действий в выдаче",
+      "synonyms": ["tovs_search", "логи поиска"]
+    },
+    {
+      "id": "mart_mixed.sku_price",
+      "domain_id": "pricing",
+      "name": "История цен и себестоимости SKU",
+      "synonyms": ["sku_price", "цены sku"]
+    },
+    {
+      "id": "report.v_sku_complaints",
+      "domain_id": "assortment",
+      "name": "Жалобы на товары",
+      "synonyms": ["complaints"]
+    },
+    {
+      "id": "mart.delivery_orders",
+      "domain_id": "delivery",
+      "name": "Заказы доставки",
+      "synonyms": ["delivery orders", "заказы курьерки"]
+    },
+    {
+      "id": "mart.loyalty_events",
+      "domain_id": "loyalty",
+      "name": "События лояльности (начисления, погашения)",
+      "synonyms": ["loyalty", "бонусы события"]
+    },
+    {
+      "id": "mart.inventory_daily",
+      "domain_id": "supply",
+      "name": "Ежедневные остатки и движения склада",
+      "synonyms": ["inventory", "остатки", "склад"]
+    },
+    {
+      "id": "logs.app_events",
+      "domain_id": "app_engagement",
+      "name": "События мобильного приложения",
+      "synonyms": ["app events", "логи мп"]
+    }
+  ],
+  "entities": [
+    {"id": "sku_category", "domain_id": "assortment", "name": "Категория товара"},
+    {"id": "sku_group", "domain_id": "assortment", "name": "Подгруппа (2 уровень)"},
+    {"id": "segment", "domain_id": "assortment", "name": "Сегмент АСР"},
+    {"id": "number", "domain_id": "search", "name": "Идентификатор пользователя/карты"},
+    {"id": "sku", "domain_id": "pricing", "name": "Товар (SKU)"},
+    {"id": "city", "domain_id": "delivery", "name": "Город доставки"},
+    {"id": "coupon", "domain_id": "loyalty", "name": "Купон/промокод"},
+    {"id": "store", "domain_id": "supply", "name": "Магазин/склад"},
+    {"id": "session", "domain_id": "app_engagement", "name": "Сессия приложения"},
+    {"id": "user", "domain_id": "app_engagement", "name": "Пользователь приложения"}
+  ]
+}
