@@ -17,7 +17,7 @@
       "id": "pricing",
       "name": "Цены и наценка",
       "description": "История цен SKU, наценка полки, себестоимость, изменения цен",
-      "synonyms": ["наценка", "маржа", "цена полки", "sku_price", "себестоимость"]
+      "synonyms": ["наценка полки", "наценка offline", "цена полки", "sku_price", "себестоимость", "переоценка"]
     },
     {
       "id": "delivery",
@@ -49,7 +49,8 @@
       "id": "client_cnt",
       "domain_id": "assortment",
       "name": "Количество уникальных карт (клиентов)",
-      "synonyms": ["карты", "клиенты", "client"],
+      "synonyms": ["карты", "клиенты", "уникальные карты", "число карт", "client"],
+      "description": "Уникальные карты лояльности в срезе куба чеков; «динамика карт» — ряд этой метрики по времени, не отдельная метрика",
       "grain_entity": "segment",
       "unit": "карты",
       "primary_source": "mart.check_aggregated_by_cube",
@@ -80,6 +81,7 @@
       "domain_id": "assortment",
       "name": "Выручка (сумма base_amt)",
       "synonyms": ["выручка", "продажи", "revenue"],
+      "description": "В кубе чеков; разговорное «маржа по кулинарии в кубе» часто означает выручку здесь, а не shelf_markup_offline",
       "grain_entity": "segment",
       "unit": "рубли",
       "primary_source": "mart.check_aggregated_by_cube",
@@ -395,7 +397,7 @@
   "entities": [
     {"id": "sku_category", "domain_id": "assortment", "name": "Категория товара"},
     {"id": "sku_group", "domain_id": "assortment", "name": "Подгруппа (2 уровень)"},
-    {"id": "segment", "domain_id": "assortment", "name": "Сегмент АСР"},
+    {"id": "segment", "domain_id": "assortment", "name": "Сегмент АСР (амбассадоры, новички и др.)"},
     {"id": "number", "domain_id": "search", "name": "Идентификатор пользователя/карты"},
     {"id": "sku", "domain_id": "pricing", "name": "Товар (SKU)"},
     {"id": "city", "domain_id": "delivery", "name": "Город доставки"},
