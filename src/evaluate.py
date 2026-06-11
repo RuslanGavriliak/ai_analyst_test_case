@@ -2,7 +2,7 @@
 Оценка Context Discovery: Context Handoff Score (CHS).
 
 Запуск: python3 src/evaluate.py
-Методика: CONTEXT_HANDOFF_SCORE.md
+Методика: README.md (раздел CHS)
 """
 
 from __future__ import annotations
@@ -181,7 +181,7 @@ def print_context_handoff_score(kpi: dict[str, float], *, matched: int, golden_t
     weak = weakest_chs_component(kpi)
     print(f"Фокус улучшения: компонент `{weak}` (наименьший вклад)")
     print()
-    print("Методика: CONTEXT_HANDOFF_SCORE.md")
+    print("Методика: README.md (раздел CHS)")
 
 
 def run_evaluation(
