@@ -1,2 +1,7 @@
 openai>=1.40.0
 python-dotenv>=1.0.0
+
+# Dashboard (src/dashboard.py) и сравнение прогонов (src/compare.py)
+streamlit>=1.40.0
+plotly>=5.24.0
+numpy>=1.26.0
