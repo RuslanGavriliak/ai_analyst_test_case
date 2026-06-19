@@ -526,6 +526,9 @@ NAV_BY_SECTION = {"overview": "Обзор", "tier1": TIER_NAMES[1],
                   "tier2": TIER_NAMES[2], "tier3": TIER_NAMES[3]}
 COMPARE_NAV = ["Различия", "Обзор", TIER_NAMES[1], TIER_NAMES[2], TIER_NAMES[3]]
 
+# Главный KPI воронки — id метрики из compare.REGISTRY (полностью корректный handoff).
+PRIME_METRIC_ID = "handoff"
+
 
 def _goto(section: str) -> None:
     st.session_state["cmp_nav"] = NAV_BY_SECTION.get(section, "Различия")
@@ -619,11 +622,28 @@ def render_diff_tab(diffs: list, name_a: str, name_b: str) -> None:
     c[1].metric("В пользу A / B", f"{favor_a} / {favor_b}")
     c[2].metric("Заметных, но мало данных", len(notable))
 
+    # Главный KPI всегда показываем первым, даже если различие незначимо.
+    prime = next((d for d in diffs if d.id == PRIME_METRIC_ID), None)
+    if prime is not None:
+        st.markdown("#### Главный KPI: полностью корректный handoff")
+        if not prime.significant:
+            st.caption("Различие по главному KPI статистически незначимо (q ≥ 0.05) — "
+                       "показываем для контекста.")
+        with st.container(border=True):
+            box = st.container()
+            _metric_card(box, prime)
+            st.button("→ к месту", key=f"jump_{prime.id}",
+                      on_click=_goto, args=(prime.section,))
+
+    st.markdown("#### Остальные метрики")
     only_sig = st.toggle("Только значимые (q<0.05)", value=True)
-    shown = sig if only_sig else sorted(
-        diffs, key=lambda d: (not d.from_zero, -d.sort_magnitude))
+    rest_diffs = [d for d in diffs if d.id != PRIME_METRIC_ID]
+    if only_sig:
+        shown = [d for d in compare.rank_significant(diffs) if d.id != PRIME_METRIC_ID]
+    else:
+        shown = sorted(rest_diffs, key=lambda d: (not d.from_zero, -d.sort_magnitude))
     if not shown:
-        st.success("Значимых различий не найдено (q<0.05).")
+        st.success("Других значимых различий не найдено (q<0.05).")
         return
     metric_grid(shown, jump=True)
 
