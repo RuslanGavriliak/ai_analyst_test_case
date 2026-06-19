@@ -40,7 +40,7 @@ STAGE_LABELS = {
     "json_ok": "Валидный JSON",
     "schema_ok": "Контракт валиден",
     "state_correct": "State верен",
-    "context_correct": "Контекст верен",
+    "context_correct": "Семантическое ядро верно",
 }
 
 
@@ -59,15 +59,18 @@ MODE_HELP = {
 }
 
 H = {
-    "prime": "Доля задач, где пакет контекста верен на ВСЕХ 5 стадиях воронки "
-             "(строгий AND). Для semantic_gap / out_of_scope пустые поля = верно. "
-             "Это конечная точка воронки и главный показатель качества handoff.",
+    "prime": "Доля задач, где ответ прошёл ВСЕ 5 стадий воронки (строгий AND). "
+             "Последняя стадия проверяет семантическое ядро контекста: domain_id, "
+             "metric_ids, sources, entity_ids. required_filters не входит в этот "
+             "строгий KPI и анализируется отдельно. Для semantic_gap / out_of_scope "
+             "пустые поля = верно.",
     "n": "Сколько эталонных задач сопоставлено и оценено.",
     "state_acc": "Доля задач с точным совпадением state с эталоном (exact match по 4 классам).",
-    "sql_ctx": "Только задачи, где ЭТАЛОННЫЙ state = ready_for_sql: доля, где поля "
-               "контекста (домен, метрики, источники, сущности) точно совпали с эталоном. "
-               "Отличие от воронки: здесь нет gap / out_of_scope, оценивается именно "
-               "контекст под черновик SQL.",
+    "sql_ctx": "Только задачи, где ЭТАЛОННЫЙ state = ready_for_sql: доля задач, где "
+               "семантическое ядро контекста точно совпало с эталоном. Поля в строгом "
+               "AND-гейте: domain_id, metric_ids, sources, entity_ids. Поле "
+               "required_filters НЕ входит в этот KPI и показывается отдельной метрикой "
+               "'Полнота обязат. фильтров'.",
     "violations": "Задачи с эталоном semantic_gap / out_of_scope, где агент всё же вернул "
                   "непустые метрики / источники / сущности (выдуманный контекст).",
     "api": "operational_reach: сервис вернул ответ. Падение здесь обнуляет все стадии дальше.",
@@ -85,12 +88,15 @@ H = {
     "mand_filter": "Доля обязательных фильтров метрики (из semantic layer, напр. свёртки "
                    "'Total' в кубе чеков), чьё поле присутствует в ответе. Пропуск "
                    "критичного фильтра = неверный grain даже при верном state.",
-    "strict_ctx_pop": "Доля задач выбранной популяции, где все поля контракта-контекста "
-                      "точно совпали с эталоном (пустое = верно).",
+    "strict_ctx_pop": "Доля задач выбранной популяции, где семантическое ядро контекста "
+                      "точно совпало с эталоном (пустое = верно). Поля строгого AND-гейта: "
+                      "domain_id, metric_ids, sources, entity_ids. required_filters "
+                      "намеренно не входит сюда и оценивается отдельно.",
     "state_acc_tier": "Доля точных совпадений state с эталоном.",
-    "field_vector": "Для каждого поля: exact (точное совпадение множеств), "
-                    "precision (точность — нет лишних/выдуманных), recall (полнота — "
-                    "не потеряли нужное), F1. Для домена — только exact (это одно значение).",
+    "field_vector": "Диагностика по JSON-полям: domain_id — scalar exact; metric_ids, "
+                    "sources, entity_ids, required_filters — set exact / precision / recall / F1. "
+                    "Важно: required_filters здесь есть, но не входит в строгий KPI "
+                    "'Семантическое ядро верно'.",
     "confusion": "Строки — эталонный state, столбцы — ответ агента. По диагонали — верные "
                  "ответы, вне диагонали — ошибки.",
     "per_class": "precision / recall / F1 по каждому классу state. Полнота (recall) "
@@ -310,7 +316,7 @@ def render_overview(report: fm.Report) -> None:
     c = st.columns(3)
     c[0].metric("Задач", report.n, help=H["n"])
     c[1].metric("Точность state", fmt(report.state["accuracy"]), help=H["state_acc"])
-    c[2].metric("SQL-контекст верен (эталон ready)", fmt(ctx_gold["strict_context_rate"]),
+    c[2].metric("Семантическое ядро верно (эталон ready)", fmt(ctx_gold["strict_context_rate"]),
                 help=H["sql_ctx"])
 
     st.markdown("#### Воронка из 5 стадий")
@@ -415,7 +421,7 @@ def render_tier3(report: fm.Report, mode: str) -> None:
     c[0].metric("Размер популяции n", ctx["n"],
                 help="Сколько задач в выбранном знаменателе." +
                      (" ⚠ маленькая выборка" if low_n else ""))
-    c[1].metric("SQL-контекст верен", fmt(ctx["strict_context_rate"]), help=H["strict_ctx_pop"])
+    c[1].metric("Семантическое ядро верно", fmt(ctx["strict_context_rate"]), help=H["strict_ctx_pop"])
     c[2].metric("Полнота обязат. фильтров", fmt(ctx["mandatory_filter_recall"]),
                 help=H["mand_filter"] + f" Считается на {ctx['mandatory_filter_n']} задачах.")
     c[3].metric("Нарушение пустоты", len(ctx["invariant_violations"]), help=H["violations"])
